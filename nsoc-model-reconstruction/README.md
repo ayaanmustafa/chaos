@@ -24,12 +24,13 @@ reference answer.
 ```bash
 pip install -r requirements.txt        # torch, numpy, pandas, scipy (pinned)
 
-python solve_best.py                   # reconstruct -> writes submission_best.csv (prints evals + MSE)
-python check_submission.py             # independent MSE + integrity check of submission_best.csv
-python forensic_markers.py             # training-fingerprint report for the recovered network
+python solution.py                          # reconstruct -> writes submission.csv + final_model.pth
+python check_submission.py submission.csv   # independent MSE + integrity check
+python forensic_markers.py submission.csv   # training-fingerprint report
 ```
 
-All commands run from the repository root (the data is under `data/`).
+All commands run from this directory (`nsoc-model-reconstruction/`; the data is under `data/`).
+`solution.py` is the entry point; `solve_best.py` is the underlying solver it calls.
 
 ## How it works (in three steps)
 
@@ -67,11 +68,15 @@ Full write-ups:
 
 ```
 .
+├── solution.py            # entry point: reassemble -> submission.csv + final_model.pth
 ├── solve_best.py          # the solver (self-contained, leak-free)
+├── model.py               # ReconstructedResNet nn.Module (loads final_model.pth)
 ├── _lib.py                # shared primitives: load, exact pairing, forward + eval counter
 ├── check_submission.py    # independent MSE + integrity verifier
 ├── forensic_markers.py    # per-block / per-layer training-marker report
-├── submission_best.csv    # the recovered block mapping (block_index, inp_piece, out_piece)
+├── submission.csv         # recovered mapping — deliverable (== submission_best.csv)
+├── submission_best.csv    # same mapping under the write-ups' name
+├── final_model.pth        # reconstructed model weights — deliverable
 ├── requirements.txt
 ├── data/
 │   ├── history_data.csv   # calibration inputs + target logits
@@ -92,6 +97,9 @@ Full write-ups:
   consults a reference reconstruction. (Any reference answer was used only as a
   research yardstick during development and is **not** included here.)
 
-> Mapping to the challenge's deliverable names: `solve_best.py` is the solution
-> script and `submission_best.csv` is the submission file — rename if your
-> submission format requires `solution.py` / `submission.csv`.
+## Deliverables (RULES.md §10)
+
+`solution.py` (entry point) · `submission.csv` (mapping) · `final_model.pth`
+(reconstructed weights) · `report.pdf` (one level up) · `requirements.txt`.
+`solve_best.py` is the underlying solver and `submission_best.csv` is the same
+mapping under the name used in the technical write-ups.
