@@ -274,8 +274,8 @@ def main():
 
     rows = [{"block_index": k, "inp_piece": fi, "out_piece": pair[fi]}
             for k, fi in enumerate(order)]
-    pd.DataFrame(rows).to_csv("submission_best.csv", index=False)
-    print("wrote submission_best.csv")
+    pd.DataFrame(rows).to_csv("submission.csv", index=False)
+    print("wrote submission.csv")
     return mse, evals
 
 

@@ -6,7 +6,7 @@ residual network from the scrambled .pth fragments, runs the forward pass over
 the calibration telemetry and reports the Logits MSE against the original model.
 
 Usage:
-    python check_submission.py [submission.csv]      (default: submission_best.csv)
+    python check_submission.py [submission.csv]      (default: submission.csv)
 """
 import os, sys, csv, torch, pandas as pd
 
@@ -51,7 +51,7 @@ def forward_mse(order_inp, order_out, X, T, proj, last, inp, out):
 
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else "submission_best.csv"
+    path = sys.argv[1] if len(sys.argv) > 1 else "submission.csv"
     if not os.path.exists(path):
         print(f"[!] Submission file not found: {path}")
         sys.exit(1)

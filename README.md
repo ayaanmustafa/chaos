@@ -56,12 +56,10 @@ All commands run from the repository root (the data is under `data/`).
 
 Full write-ups:
 
-- **[`APPROACH.md`](APPROACH.md)** — complete technical method (math, pairing,
-  markers, repair, eval accounting, floor analysis, verification).
-- **[`EVOLUTION.md`](EVOLUTION.md)** — chronological account of how the solution
-  developed (2,237 → 60 forward evaluations).
-- **[`SOLUTION.md`](SOLUTION.md)** — one-page summary.
-- **[`methodology.md`](methodology.md)** — literature-grounded methodology survey.
+- **[`TECHNICAL.md`](TECHNICAL.md)** — the complete technical document: method
+  (math, pairing, markers, repair, eval accounting, floor analysis, verification),
+  the development chronology, and the methodology / literature survey.
+- **[`report.pdf`](report.pdf)** — the technical report (graded deliverable).
 - **[`RULES.md`](RULES.md)** — the original challenge specification.
 
 ## Repository layout
@@ -74,8 +72,7 @@ Full write-ups:
 ├── _lib.py                # shared primitives: load, exact pairing, forward + eval counter
 ├── check_submission.py    # independent MSE + integrity verifier
 ├── forensic_markers.py    # per-block / per-layer training-marker report
-├── submission.csv         # recovered mapping — deliverable (== submission_best.csv)
-├── submission_best.csv    # same mapping under the write-ups' name
+├── submission.csv         # recovered mapping — deliverable
 ├── final_model.pth        # reconstructed model weights — deliverable
 ├── requirements.txt
 ├── data/
@@ -83,7 +80,7 @@ Full write-ups:
 │   └── pieces/            # piece_0.pth … piece_65.pth (the scrambled fragments)
 ├── samples/               # sample / random submission templates
 ├── report.pdf             # technical report
-├── APPROACH.md  EVOLUTION.md  SOLUTION.md  methodology.md  RULES.md
+├── TECHNICAL.md  RULES.md
 └── README.md
 ```
 
@@ -102,5 +99,4 @@ Full write-ups:
 
 `solution.py` (entry point) · `submission.csv` (mapping) · `final_model.pth`
 (reconstructed weights) · `report.pdf` · `requirements.txt`.
-`solve_best.py` is the underlying solver and `submission_best.csv` is the same
-mapping under the name used in the technical write-ups.
+`solve_best.py` is the underlying solver that `solution.py` calls.
