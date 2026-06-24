@@ -1,7 +1,7 @@
 """
 forensic_markers.py  --  training-induced fingerprint extraction
 
-Given a *solved* submission (default submission_best.csv, MSE==0), this
+Given a *solved* submission (default submission.csv, MSE==0), this
 reverse-engineers the recovered network and quantifies the structural markers
 that gradient-descent training left in the weights. These are the signals an
 optimized reconstruction solver should exploit to recover PAIRING and ORDER
@@ -16,7 +16,7 @@ Reported per-block / per-layer:
   * latent-norm trajectory across depth  (ordering marker)
   * pairing separability (Hungarian margin on ||W_out W_in||)
 
-Usage:  python forensic_markers.py [submission_best.csv]
+Usage:  python forensic_markers.py [submission.csv]
 """
 import os, sys, csv, math, torch, numpy as np, pandas as pd
 from scipy.optimize import linear_sum_assignment
@@ -26,7 +26,7 @@ np.set_printoptions(precision=4, suppress=True)
 
 PIECES_DIR, DATA = "data/pieces", "data/history_data.csv"
 INPUT_DIM, LATENT_DIM, HIDDEN_DIM, NUM_CLASSES = 784, 16, 32, 10
-SUB = sys.argv[1] if len(sys.argv) > 1 else "submission_best.csv"
+SUB = sys.argv[1] if len(sys.argv) > 1 else "submission.csv"
 
 # ---- load
 df = pd.read_csv(DATA)
