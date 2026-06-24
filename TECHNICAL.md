@@ -17,8 +17,8 @@ leakage.*
 7. [Sub-problem B — ordering: the oracle-guided repair](#7-sub-problem-b--ordering-the-repair)
 8. [Forward-evaluation accounting](#8-forward-evaluation-accounting)
 9. [The optimization journey and how it was found](#9-the-optimization-journey)
-10. [Lower-bound / floor analysis](#10-lower-bound-floor-analysis)
-11. [What did not work (negative results)](#11-what-did-not-work)
+10. [Lower-bound / floor analysis](#10-lower-bound--floor-analysis)
+11. [What did not work (negative results)](#11-what-did-not-work-negative-results)
 12. [Verification and legitimacy](#12-verification-and-legitimacy)
 13. [Results summary](#13-results-summary)
 14. [Reproducibility and repository layout](#14-reproducibility)
@@ -161,7 +161,7 @@ A per-row "take each $W_{\mathrm{in}}$'s best $W_{\mathrm{out}}$" is both
   for the 32 $W_{\mathrm{in}}$ — 6 collisions — so it is not even a valid
   matching.
 - **Weak per-row margins.** The gap between each row's best and second-best
-  score is only **12–33 %** (e.g. `piece_25` has an 11.8 % margin), so individual
+  score is only **3–33 %** (e.g. `piece_25` has an 11.8 % margin), so individual
   rows are genuinely ambiguous.
 
 The Hungarian *global* optimum resolves both: it maximizes the **total** affinity
@@ -334,7 +334,7 @@ On this instance the prior achieves:
 | Max displacement (`maxdev`) | **4** |
 | Longest increasing subsequence (LIS) | 17 |
 | Min relocations to sort ($n-\mathrm{LIS}$) | 15 |
-| Exact slots correct | 9/32 (0.281) |
+| Exact slots correct | 10/32 (0.312) |
 
 Every block is within $\pm4$ of its true slot, with errors **distributed** across
 the sequence (displacements of $\pm3$–$4$ appear at slots 4–29, not in one tidy
@@ -539,7 +539,7 @@ These were implemented, measured, and rejected — they bound the design space:
 |---|---|---|
 | Blind hill-climb from a random anchor | >2,000 (often stuck) | weak start, no structural prior |
 | Greedy contraction-only prior | 41,041 init MSE | contraction at a fixed point is a poor *direct* sort key |
-| Pairing by `‖W_out·W_in‖` row-greedy | invalid | 6 collisions; per-row margins 12–33 % |
+| Pairing by `‖W_out·W_in‖` row-greedy | invalid | 6 collisions; per-row margins 3–33 % |
 | Subspace-chaining order (Hamiltonian path) | kendall 0.67–0.70 | worse prior than bias+firing |
 | O1 greedy oracle peeling | stalls at MSE 0.155 | cannot self-certify MSE 0 |
 | Windowed insertion repair | 708–1,320 | window scans dominate |
@@ -765,7 +765,7 @@ usable depth "clock."
 - Established the central asymmetry: **pairing is exactly recoverable for free.**
   Hungarian assignment on $\|W_{\mathrm{out}}W_{\mathrm{in}}\|_F$ gives **100 %**
   correct pairing at **0 forward evaluations** (greedy per-row collides: 6
-  collisions, 12–33 % margins — only the global optimum works).
+  collisions, 3–33 % margins — only the global optimum works).
 - Wrote `solve_optimized.py`: pairing (0 evals) + a contraction-greedy ordering
   prior + adjacent-swap repair.
   - First version, with a full $O(K^2)$ rescan after every accepted move:
