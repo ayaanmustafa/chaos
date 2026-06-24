@@ -1,0 +1,6 @@
+# Pinned to the contest's frozen judge image (Python 3.11, CPU only).
+# Only the packages this solver actually uses.
+torch==2.3.1
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.1

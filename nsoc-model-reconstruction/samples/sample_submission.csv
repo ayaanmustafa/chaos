@@ -1,0 +1,5 @@
+block_index,inp_piece,out_piece
+0,piece_X.pth,piece_Y.pth
+1,piece_A.pth,piece_B.pth
+...,...,...
+31,piece_W.pth,piece_Z.pth
