@@ -1,97 +1,80 @@
-# NSOC Model Reconstruction — Rebuild From Chaos
+# Operation: Rebuild From Chaos — NSOC Model Reconstruction
 
 Reconstructs a trained deep **residual MLP** that was shattered into 66 unlabeled
 weight fragments, recovering the exact block **pairing** and **ordering** so the
-rebuilt network reproduces the original model's logits with **Mean-Squared-Error
-0** (9.17 × 10⁻¹², i.e. bit-exact up to float32 round-off).
-
-The reconstruction is **self-contained and leak-free** — it reads only the weight
-fragments and the calibration inputs, with no hardcoded mapping and no use of any
-reference answer.
-
-## Headline result
+rebuilt network reproduces the original model's logits with **MSE 0**
+(9.17 × 10⁻¹², bit-exact up to float32 round-off) — in **60 forward evaluations**,
+fully self-contained and leak-free.
 
 | | |
 |---|---|
 | Logits MSE vs original | **9.169501 × 10⁻¹²** (exact 0) |
 | Pairing accuracy | **100 %**, in **0 forward evaluations** |
-| Ordering | recovered exactly |
-| **Total forward evaluations** | **60** |
+| Total forward evaluations | **60** |
 | Search space avoided | `(32!)² ≈ 7 × 10⁷⁰` |
+
+## Where everything lives
+
+The solution is in [`nsoc-model-reconstruction/`](nsoc-model-reconstruction/);
+the technical report is [`report.pdf`](report.pdf).
+
+```
+chaos/
+├── report.pdf                     # technical report
+└── nsoc-model-reconstruction/     # the solution (run commands from here)
+    ├── solution.py        # entry point — reassembles, writes submission.csv + final_model.pth
+    ├── solve_best.py       # the solver (pairing + prior + repair)
+    ├── model.py            # ReconstructedResNet (loads final_model.pth)
+    ├── _lib.py             # shared primitives: load, exact pairing, forward + eval counter
+    ├── check_submission.py # independent MSE + integrity verifier
+    ├── forensic_markers.py # per-block training-marker report
+    ├── submission.csv      # reassembled mapping (deliverable)
+    ├── final_model.pth     # reconstructed model weights (deliverable)
+    ├── requirements.txt    # pinned deps (torch, numpy, pandas, scipy)
+    ├── data/  samples/
+    └── README.md  APPROACH.md  EVOLUTION.md  SOLUTION.md  methodology.md  RULES.md
+```
 
 ## Quick start
 
 ```bash
-pip install -r requirements.txt        # torch, numpy, pandas, scipy (pinned)
+cd nsoc-model-reconstruction
+pip install -r requirements.txt
 
-python solve_best.py                   # reconstruct -> writes submission_best.csv (prints evals + MSE)
-python check_submission.py             # independent MSE + integrity check of submission_best.csv
-python forensic_markers.py             # training-fingerprint report for the recovered network
+python solution.py                          # -> writes submission.csv + final_model.pth
+python check_submission.py submission.csv   # independent MSE + integrity check
+python forensic_markers.py submission.csv   # training-fingerprint report
 ```
 
-All commands run from the repository root (the data is under `data/`).
+## Deliverables (RULES.md §10)
 
-## How it works (in three steps)
+| File | Contents |
+|---|---|
+| `solution.py` | automated reassembly script |
+| `submission.csv` | reassembled mapping (`block_index, inp_piece, out_piece`) |
+| `final_model.pth` | `state_dict` of the reconstructed network |
+| `report.pdf` | technical report |
+| `requirements.txt` | pinned dependencies |
 
-1. **Pairing — exact, 0 evaluations.** Each $W_{\text{in}}$ is matched to its
-   $W_{\text{out}}$ by a **Hungarian assignment** on the affinity
-   `‖W_out · W_in‖_F`. The global optimum recovers all 32 pairs with 100 %
-   accuracy from the weights alone — no network runs.
+## How it works (one paragraph)
 
-2. **Ordering prior — unsupervised, 0 evaluations.** Each block's depth is
-   estimated from training fingerprints that are computable without the answer: a
-   per-block **bias composite** and the **ReLU firing fraction** at the
-   front-projected latent, fused by **Borda rank aggregation** and oriented by the
-   network's latent-norm contraction. This places every block within ±4 of its
-   true slot (~30 inversions).
-
-3. **Repair — suspect-gated insertion sort, 60 evaluations.** A free suspect
-   predicate flags likely-misordered adjacent pairs; each flagged block is sifted
-   left by adjacent swaps while a single prefix-cached forward pass confirms the
-   global MSE strictly drops. A neighbour-localized worklist resolves the residual
-   deep-cluster knot, and a shrinking cocktail pass certifies exactness (it stops
-   the instant MSE hits 0). This sits at the structural floor `(n−1)+I ≈ 61` for
-   sorting a near-sorted permutation.
-
-Full write-ups:
-
-- **[`APPROACH.md`](APPROACH.md)** — complete technical method (math, pairing,
-  markers, repair, eval accounting, floor analysis, verification).
-- **[`EVOLUTION.md`](EVOLUTION.md)** — chronological account of how the solution
-  developed (2,237 → 60 forward evaluations).
-- **[`SOLUTION.md`](SOLUTION.md)** — one-page summary.
-- **[`methodology.md`](methodology.md)** — literature-grounded methodology survey.
-- **[`RULES.md`](RULES.md)** — the original challenge specification.
-
-## Repository layout
-
-```
-.
-├── solve_best.py          # the solver (self-contained, leak-free)
-├── _lib.py                # shared primitives: load, exact pairing, forward + eval counter
-├── check_submission.py    # independent MSE + integrity verifier
-├── forensic_markers.py    # per-block / per-layer training-marker report
-├── submission_best.csv    # the recovered block mapping (block_index, inp_piece, out_piece)
-├── requirements.txt
-├── data/
-│   ├── history_data.csv   # calibration inputs + target logits
-│   └── pieces/            # piece_0.pth … piece_65.pth (the scrambled fragments)
-├── samples/               # sample / random submission templates
-├── APPROACH.md  EVOLUTION.md  SOLUTION.md  methodology.md  RULES.md
-└── README.md
-```
+**Pairing is free:** each `W_in` is matched to its `W_out` by a Hungarian
+assignment on `‖W_out · W_in‖_F` — 100 % correct from the weights alone, 0 forward
+evaluations. **Ordering** is recovered by a strong unsupervised *prior* (a Borda
+blend of per-block bias structure and ReLU firing-fraction-at-X0, oriented by the
+network's latent-norm contraction) that places every block within ±4 of its true
+slot, then a **suspect-gated insertion-sort repair** fixes the ~30 residual local
+inversions in 60 forward evaluations — at the structural floor for sorting a
+near-sorted permutation. Full details in
+[`nsoc-model-reconstruction/APPROACH.md`](nsoc-model-reconstruction/APPROACH.md).
 
 ## Verification & integrity
 
-- `check_submission.py` recomputes the logits MSE from a fresh forward pass and
-  asserts each fragment is used exactly once and the pairing equals the Hungarian
-  assignment.
-- The 60 forward evaluations were independently confirmed by intercepting every
-  MSE computation (reported count == intercepted count).
-- The solver reads only `data/pieces/*.pth` and `data/history_data.csv`; it never
-  consults a reference reconstruction. (Any reference answer was used only as a
-  research yardstick during development and is **not** included here.)
-
-> Mapping to the challenge's deliverable names: `solve_best.py` is the solution
-> script and `submission_best.csv` is the submission file — rename if your
-> submission format requires `solution.py` / `submission.csv`.
+- `python check_submission.py submission.csv` recomputes the logits MSE from a
+  fresh forward pass and asserts each fragment is used exactly once and the pairing
+  equals the Hungarian assignment.
+- `solution.py` reloads `final_model.pth` from disk and confirms it reproduces MSE 0.
+- The 60 forward evaluations were independently confirmed by intercepting every MSE
+  computation (reported == intercepted).
+- The solver reads only `data/pieces/*.pth` and `data/history_data.csv` — no
+  hardcoded mapping, no reference answer.
