@@ -1,11 +1,11 @@
-# NSOC Model Reconstruction — Rebuild From Chaos
+# NSOC Model Reconstruction - Rebuild From Chaos
 
 Reconstructs a trained deep **residual MLP** that was shattered into 66 unlabeled
 weight fragments, recovering the exact block **pairing** and **ordering** so the
 rebuilt network reproduces the original model's logits with **Mean-Squared-Error
 0** (9.17 × 10⁻¹², i.e. bit-exact up to float32 round-off).
 
-The reconstruction is **self-contained and leak-free** — it reads only the weight
+The reconstruction is **self-contained and leak-free** - it reads only the weight
 fragments and the calibration inputs, with no hardcoded mapping and no use of any
 reference answer.
 
@@ -34,19 +34,19 @@ All commands run from the repository root (the data is under `data/`).
 
 ## How it works (in three steps)
 
-1. **Pairing — exact, 0 evaluations.** Each $W_{\text{in}}$ is matched to its
+1. **Pairing - exact, 0 evaluations.** Each $W_{\text{in}}$ is matched to its
    $W_{\text{out}}$ by a **Hungarian assignment** on the affinity
    `‖W_out · W_in‖_F`. The global optimum recovers all 32 pairs with 100 %
-   accuracy from the weights alone — no network runs.
+   accuracy from the weights alone - no network runs.
 
-2. **Ordering prior — unsupervised, 0 evaluations.** Each block's depth is
+2. **Ordering prior - unsupervised, 0 evaluations.** Each block's depth is
    estimated from training fingerprints that are computable without the answer: a
    per-block **bias composite** and the **ReLU firing fraction** at the
    front-projected latent, fused by **Borda rank aggregation** and oriented by the
    network's latent-norm contraction. This places every block within ±4 of its
    true slot (~30 inversions).
 
-3. **Repair — suspect-gated insertion sort, 60 evaluations.** A free suspect
+3. **Repair - suspect-gated insertion sort, 60 evaluations.** A free suspect
    predicate flags likely-misordered adjacent pairs; each flagged block is sifted
    left by adjacent swaps while a single prefix-cached forward pass confirms the
    global MSE strictly drops. A neighbour-localized worklist resolves the residual
@@ -56,11 +56,11 @@ All commands run from the repository root (the data is under `data/`).
 
 Full write-ups:
 
-- **[`TECHNICAL.md`](TECHNICAL.md)** — the complete technical document: method
+- **[`TECHNICAL.md`](TECHNICAL.md)** - the complete technical document: method
   (math, pairing, markers, repair, eval accounting, floor analysis, verification),
   the development chronology, and the methodology / literature survey.
-- **[`report.pdf`](report.pdf)** — the technical report (graded deliverable).
-- **[`RULES.md`](RULES.md)** — the original challenge specification.
+- **[`report.pdf`](report.pdf)** - the technical report (graded deliverable).
+- **[`RULES.md`](RULES.md)** - the original challenge specification.
 
 ## Repository layout
 
@@ -72,8 +72,8 @@ Full write-ups:
 ├── _lib.py                # shared primitives: load, exact pairing, forward + eval counter
 ├── check_submission.py    # independent MSE + integrity verifier
 ├── forensic_markers.py    # per-block / per-layer training-marker report
-├── submission.csv         # recovered mapping — deliverable
-├── final_model.pth        # reconstructed model weights — deliverable
+├── submission.csv         # recovered mapping - deliverable
+├── final_model.pth        # reconstructed model weights - deliverable
 ├── requirements.txt
 ├── data/
 │   ├── history_data.csv   # calibration inputs + target logits
