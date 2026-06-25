@@ -452,7 +452,7 @@ A consistent, strict convention is used so all numbers are comparable and honest
   the latent).
 - Pairing and the prior run *before* the counter is reset, so they contribute 0.
 
-Counting is implemented via a shared counter in `_lib.py` and was
+Counting is implemented via a shared counter in `solution.py` and was
 **independently re-verified** by intercepting every `torch.nn.functional.mse_loss`
 call - the intercepted count equals the reported count exactly (Section 12).
 
@@ -605,10 +605,7 @@ Repository layout:
 
 | Path | Role |
 |---|---|
-| `solution.py` | entry point: reassemble -> `submission.csv` + `final_model.pth` |
-| `solve_best.py` | the solver (60-eval suspect-gated insertion sort) |
-| `model.py` | `ReconstructedResNet` nn.Module (loads `final_model.pth`) |
-| `_lib.py` | shared primitives: load, exact Hungarian pairing, forward + eval counter |
+| `solution.py` | single self-contained solver (pairing + ordering prior + 60-eval insertion-sort repair + `ReconstructedResNet`) -> `submission.csv` + `final_model.pth` |
 | `check_submission.py` | MSE + integrity verifier for any submission |
 | `forensic_markers.py` | per-block / per-layer training-marker report |
 | `submission.csv` | recovered block mapping (deliverable) |

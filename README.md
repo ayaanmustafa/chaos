@@ -30,7 +30,8 @@ python forensic_markers.py submission.csv   # training-fingerprint report
 ```
 
 All commands run from the repository root (the data is under `data/`).
-`solution.py` is the entry point; `solve_best.py` is the underlying solver it calls.
+`solution.py` is a single self-contained file — pairing, ordering prior, repair,
+and the model definition are all inlined (no other modules required to run it).
 
 ## How it works (in three steps)
 
@@ -66,10 +67,7 @@ Full write-ups:
 
 ```
 .
-├── solution.py            # entry point: reassemble -> submission.csv + final_model.pth
-├── solve_best.py          # the solver (self-contained, leak-free)
-├── model.py               # ReconstructedResNet nn.Module (loads final_model.pth)
-├── _lib.py                # shared primitives: load, exact pairing, forward + eval counter
+├── solution.py            # single self-contained solver: reassemble -> submission.csv + final_model.pth
 ├── check_submission.py    # independent MSE + integrity verifier
 ├── forensic_markers.py    # per-block / per-layer training-marker report
 ├── submission.csv         # recovered mapping - deliverable
@@ -97,6 +95,5 @@ Full write-ups:
 
 ## Deliverables (RULES.md §10)
 
-`solution.py` (entry point) · `submission.csv` (mapping) · `final_model.pth`
-(reconstructed weights) · `report.pdf` · `requirements.txt`.
-`solve_best.py` is the underlying solver that `solution.py` calls.
+`solution.py` (single self-contained solver) · `submission.csv` (mapping) ·
+`final_model.pth` (reconstructed weights) · `report.pdf` · `requirements.txt`.
